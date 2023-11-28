@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 function App() {
   const webcamRef = useRef<Webcam>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
@@ -21,7 +22,7 @@ function App() {
     setMediaRecorder(_mediaRecorder);
     _mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
-        const chunks = [...recordedChunks, e.data];
+        const chunks = [e.data];
         setRecordedChunks(chunks);
         console.log('chunks', chunks);
       }
@@ -35,10 +36,12 @@ function App() {
   };
 
   const handlePauseRecording = () => {
+    setIsPaused(true);
     mediaRecorder && mediaRecorder.pause();
   };
 
   const handleResumeRecording = () => {
+    setIsPaused(false);
     mediaRecorder && mediaRecorder.resume();
   };
 
@@ -47,11 +50,11 @@ function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     document.body.appendChild(a);
-    // a.style = 'display: none';
     a.href = url;
     a.download = 'recorded.webm';
     a.click();
     window.URL.revokeObjectURL(url);
+    a.parentElement?.removeChild(a);
   };
 
   return (
@@ -69,8 +72,11 @@ function App() {
       {isRecording ? (
         <>
           <button onClick={handleStopRecording}>stop recording</button>
-          <button onClick={handlePauseRecording}>pause recording</button>
-          <button onClick={handleResumeRecording}>resume recording</button>
+          {isPaused ? (
+            <button onClick={handleResumeRecording}>resume recording</button>
+          ) : (
+            <button onClick={handlePauseRecording}>pause recording</button>
+          )}
         </>
       ) : (
         <>
