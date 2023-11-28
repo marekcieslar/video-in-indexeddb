@@ -32,8 +32,12 @@ function App() {
       return;
     }
 
-    const _mediaRecorder = new MediaRecorder(webcamRef.current!.stream);
+    const _mediaRecorder = new MediaRecorder(webcamRef.current!.stream, {
+      mimeType: 'video/webm',
+    });
+
     setMediaRecorder(_mediaRecorder);
+
     _mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         const chunks = [e.data];
@@ -45,6 +49,7 @@ function App() {
         });
       }
     };
+
     _mediaRecorder.start();
   };
 
@@ -80,13 +85,14 @@ function App() {
       <Webcam
         audio={false}
         ref={webcamRef}
-        width={320}
-        height={280}
+        width={640}
+        height={480}
         videoConstraints={{ frameRate: 25 }}
         style={{
           transform: 'scaleX(-1)',
         }}
       />
+
       <br />
 
       {isRecording ? (
@@ -109,6 +115,7 @@ function App() {
           <li key={item.name + item.id}>
             <span>id: {item.id} </span>
             <span>name: {item.name} </span>
+            <span>size: {(item.data.size / (1024 * 1024)).toFixed(3)}Mb</span>
             <button onClick={() => downloadVideo(item)}>download</button>
             <button onClick={() => db.removeFromDb(item.id)}>delete</button>
           </li>
