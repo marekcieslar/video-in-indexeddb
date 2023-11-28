@@ -101,10 +101,10 @@ function App() {
       <ul>
         {items.map((item) => (
           <li key={item.name + item.id}>
-            <span>{item.id}</span>
-            <button onClick={() => downloadVideo(item)}>
-              download {item.name}
-            </button>
+            <span>id: {item.id} </span>
+            <span>name: {item.name} </span>
+            <button onClick={() => downloadVideo(item)}>download</button>
+            <button onClick={() => db.removeFromDb(item.id)}>delete</button>
           </li>
         ))}
       </ul>

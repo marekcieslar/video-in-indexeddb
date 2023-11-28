@@ -29,6 +29,18 @@ const useIndexedDB = (dbName: string, storeName: string) => {
     openDB();
   }, [dbName, storeName]);
 
+  const removeFromDb = (id) => {
+    if (!db) return;
+
+    const transaction = db.transaction(storeName, 'readwrite');
+    const objectStore = transaction.objectStore(storeName);
+    const request = objectStore.delete(id);
+
+    request.onerror = (event) => {
+      console.error('Error deleting from IndexedDB', event.target.error);
+    };
+  };
+
   const addToDB = ({ name, data }: { name: string; data: Blob[] }) => {
     if (!db) return;
 
@@ -60,6 +72,7 @@ const useIndexedDB = (dbName: string, storeName: string) => {
   return {
     addToDB,
     getAllFromDB,
+    removeFromDb,
   };
 };
 
