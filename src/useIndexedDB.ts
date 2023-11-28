@@ -29,12 +29,12 @@ const useIndexedDB = (dbName: string, storeName: string) => {
     openDB();
   }, [dbName, storeName]);
 
-  const addToDB = (data) => {
+  const addToDB = ({ name, data }: { name: string; data: Blob[] }) => {
     if (!db) return;
 
     const transaction = db.transaction(storeName, 'readwrite');
     const objectStore = transaction.objectStore(storeName);
-    const request = objectStore.add(data);
+    const request = objectStore.add({ name, data });
 
     request.onerror = (event) => {
       console.error('Error adding to IndexedDB', event.target.error);

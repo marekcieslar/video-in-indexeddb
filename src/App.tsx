@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import useIndexedDB from './useIndexedDB';
 
@@ -10,8 +10,15 @@ function App() {
     null
   );
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const [items, setItems] = useState([]);
 
   const db = useIndexedDB('test-db', 'store-name');
+
+  useEffect(() => {
+    db.getAllFromDB((data) => {
+      setItems(data);
+    });
+  }, [db.getAllFromDB]);
 
   const handleStartRecording = () => {
     setIsRecording(true);
@@ -28,7 +35,7 @@ function App() {
         setRecordedChunks(chunks);
         console.log('chunks', chunks);
 
-        db.addToDB(chunks);
+        db.addToDB({ name: Date.now().toString(), data: chunks });
       }
     };
     _mediaRecorder.start();
@@ -69,7 +76,10 @@ function App() {
         ref={webcamRef}
         width={320}
         height={280}
-        videoConstraints={{ frameRate: 15, facingMode: 'user' }}
+        videoConstraints={{ frameRate: 25 }}
+        style={{
+          transform: 'scaleX(-1)',
+        }}
       />
       <br />
 
@@ -92,6 +102,8 @@ function App() {
       )}
 
       <br />
+
+      <pre>{JSON.stringify(items, null, 2)}</pre>
     </>
   );
 }
