@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import useIndexedDB from './useIndexedDB';
 
+interface DataRecordType {
+  id: number;
+  name: string;
+  data: Blob;
+}
+
 function App() {
   const webcamRef = useRef<Webcam>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -9,16 +15,15 @@ function App() {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
-  const [items, setItems] = useState<
-    { name: string; id: number; data: Blob[] }[]
-  >([]);
+  const [items, setItems] = useState<DataRecordType[]>([]);
 
   const db = useIndexedDB('test-db', 'store-name');
 
   useEffect(() => {
-    db.getAllFromDB((data) => {
+    db.getAllFromDB((data: DataRecordType[]) => {
       setItems(data);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db.getAllFromDB]);
 
   const handleStartRecording = () => {
@@ -34,7 +39,10 @@ function App() {
         const chunks = [e.data];
         console.log('chunks', chunks);
 
-        db.addToDB({ name: Date.now().toString(), data: chunks });
+        db.addToDB({
+          name: Date.now().toString(),
+          data: new Blob(chunks, { type: 'video/webm' }),
+        });
       }
     };
     _mediaRecorder.start();
@@ -55,13 +63,12 @@ function App() {
     mediaRecorder && mediaRecorder.resume();
   };
 
-  const downloadVideo = ({ name, data }: { name: string; data: Blob[] }) => {
-    const blob = new Blob(data, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
+  const downloadVideo = ({ id, name, data }: DataRecordType) => {
+    const url = URL.createObjectURL(data);
     const a = document.createElement('a');
     document.body.appendChild(a);
     a.href = url;
-    a.download = `recorded_${name}.webm`;
+    a.download = `recorded_${id}_${name}.webm`;
     a.click();
     window.URL.revokeObjectURL(url);
     a.parentElement?.removeChild(a);

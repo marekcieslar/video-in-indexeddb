@@ -41,7 +41,7 @@ const useIndexedDB = (dbName: string, storeName: string) => {
     };
   };
 
-  const addToDB = ({ name, data }: { name: string; data: Blob[] }) => {
+  const addToDB = ({ name, data }: { name: string; data: Blob }) => {
     if (!db) return;
 
     const transaction = db.transaction(storeName, 'readwrite');
