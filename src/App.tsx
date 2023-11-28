@@ -56,7 +56,7 @@ function App() {
     mediaRecorder && mediaRecorder.resume();
   };
 
-  const downloadVideo = () => {
+  const downloadVideo = ({ name, data }: { name: string; data: Blob[] }) => {
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -93,17 +93,21 @@ function App() {
           )}
         </>
       ) : (
-        <>
-          <button onClick={handleStartRecording}>start recording</button>
-          {recordedChunks.length > 0 && (
-            <button onClick={downloadVideo}>download video</button>
-          )}
-        </>
+        <button onClick={handleStartRecording}>start recording</button>
       )}
 
       <br />
 
-      <pre>{JSON.stringify(items, null, 2)}</pre>
+      <ul>
+        {items.map((item) => (
+          <li key={item.name + item.id}>
+            <span>{item.id}</span>
+            <button onClick={() => downloadVideo(item)}>
+              download {item.name}
+            </button>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
