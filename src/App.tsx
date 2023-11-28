@@ -9,8 +9,9 @@ function App() {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<
+    { name: string; id: number; data: Blob[] }[]
+  >([]);
 
   const db = useIndexedDB('test-db', 'store-name');
 
@@ -22,7 +23,6 @@ function App() {
 
   const handleStartRecording = () => {
     setIsRecording(true);
-    setRecordedChunks([]);
     if (webcamRef.current!.stream === null) {
       return;
     }
@@ -32,7 +32,6 @@ function App() {
     _mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         const chunks = [e.data];
-        setRecordedChunks(chunks);
         console.log('chunks', chunks);
 
         db.addToDB({ name: Date.now().toString(), data: chunks });
@@ -57,12 +56,12 @@ function App() {
   };
 
   const downloadVideo = ({ name, data }: { name: string; data: Blob[] }) => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const blob = new Blob(data, { type: 'video/webm' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     document.body.appendChild(a);
     a.href = url;
-    a.download = 'recorded.webm';
+    a.download = `recorded_${name}.webm`;
     a.click();
     window.URL.revokeObjectURL(url);
     a.parentElement?.removeChild(a);
